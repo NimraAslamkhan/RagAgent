@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Agent - Document Intelligence Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        primary: '#2563EB',
+                        secondary: '#10B981',
+                        accent: '#F59E0B',
+                        surface: '#FFFFFF',
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen">
+    <!-- @COMPONENT: AppLayout -->
+    <div class="flex h-screen">
+        <!-- @COMPONENT: Sidebar -->
+        <div class="w-64 bg-white shadow-lg border-r border-gray-200 flex flex-col">
+            <!-- @COMPONENT: Logo/Header -->
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
+                        <i class="fas fa-brain text-white text-lg"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-semibold text-gray-900">RAG Agent</h1>
+                        <p class="text-sm text-gray-500">Document Intelligence</p>
+                    </div>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: Logo/Header -->
+
+            <!-- @COMPONENT: Navigation -->
+            <nav class="flex-1 p-4">
+                <ul class="space-y-2">
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg bg-primary text-white">
+                            <i class="fas fa-home text-sm"></i>
+                            <span class="font-medium">Dashboard</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-upload text-sm"></i>
+                            <span class="font-medium">Upload Documents</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-folder text-sm"></i>
+                            <span class="font-medium">Document Library</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-search text-sm"></i>
+                            <span class="font-medium">Query Interface</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" class="flex items-center space-x-3 px-3 py-2 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
+                            <i class="fas fa-chart-bar text-sm"></i>
+                            <span class="font-medium">Analytics</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <!-- @END_COMPONENT: Navigation -->
+
+            <!-- @COMPONENT: UserInfo -->
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center">
+                        <i class="fas fa-user text-gray-600 text-sm"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-medium text-gray-900" data-mock="true">John Doe</p>
+                        <p class="text-xs text-gray-500">Admin</p>
+                    </div>
+                    <button class="text-gray-400 hover:text-gray-600">
+                        <i class="fas fa-cog text-sm"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- @END_COMPONENT: UserInfo -->
+        </div>
+        <!-- @END_COMPONENT: Sidebar -->
+
+        <!-- @COMPONENT: MainContent -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- @COMPONENT: TopBar -->
+            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-gray-900">Document Intelligence Dashboard</h2>
+                        <p class="text-gray-600">Upload, process, and query your documents with AI</p>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <!-- @STATE: notificationCount:number = 3 -->
+                        <button class="relative p-2 text-gray-400 hover:text-gray-600 transition-colors">
+                            <i class="fas fa-bell text-lg"></i>
+                            <span class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center" data-mock="true">3</span>
+                        </button>
+                        <button class="bg-primary text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                            <i class="fas fa-plus mr-2"></i>
+                            New Query
+                        </button>
+                    </div>
+                </div>
+            </header>
+            <!-- @END_COMPONENT: TopBar -->
+
+            <!-- @COMPONENT: MainDashboard -->
+            <main class="flex-1 overflow-y-auto p-6">
+                <!-- @COMPONENT: StatsCards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Documents Processed</p>
+                                <p class="text-3xl font-bold text-gray-900" data-mock="true">247</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-file-alt text-primary text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center">
+                            <span class="text-secondary text-sm font-medium">+12%</span>
+                            <span class="text-gray-500 text-sm ml-1">from last month</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Total Queries</p>
+                                <p class="text-3xl font-bold text-gray-900" data-mock="true">1,429</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-search text-secondary text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center">
+                            <span class="text-secondary text-sm font-medium">+8%</span>
+                            <span class="text-gray-500 text-sm ml-1">from last week</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Vector Embeddings</p>
+                                <p class="text-3xl font-bold text-gray-900" data-mock="true">12.5K</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-vector-square text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center">
+                            <span class="text-secondary text-sm font-medium">+15%</span>
+                            <span class="text-gray-500 text-sm ml-1">from yesterday</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600">Avg Response Time</p>
+                                <p class="text-3xl font-bold text-gray-900" data-mock="true">1.2s</p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
+                                <i class="fas fa-clock text-accent text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center">
+                            <span class="text-red-500 text-sm font-medium">-5%</span>
+                            <span class="text-gray-500 text-sm ml-1">from last hour</span>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: StatsCards -->
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <!-- @COMPONENT: DocumentUpload -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900">Upload Documents</h3>
+                            <span class="text-sm text-gray-500">PDF, TXT supported</span>
+                        </div>
+                        
+                        <!-- @FUNCTIONALITY: File upload with drag-and-drop, validation, and progress tracking -->
+                        <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors">
+                            <div class="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+                                <i class="fas fa-cloud-upload-alt text-gray-400 text-2xl"></i>
+                            </div>
+                            <h4 class="text-lg font-medium text-gray-900 mb-2">Drop files here or click to upload</h4>
+                            <p class="text-gray-500 mb-4">Support for PDF and TXT files up to 10MB</p>
+                            <button class="bg-primary text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors font-medium" data-event="click:handleFileUpload">
+                                <i class="fas fa-plus mr-2"></i>
+                                Choose Files
+                            </button>
+                        </div>
+
+                        <!-- @COMPONENT: UploadProgress -->
+                        <div class="mt-6 space-y-3" data-implementation="Show when files are being processed">
+                            <div class="bg-gray-50 rounded-lg p-4" data-mock="true">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-900">research_paper.pdf</span>
+                                    <span class="text-sm text-secondary">Processing...</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-primary h-2 rounded-full" style="width: 65%"></div>
+                                </div>
+                                <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                    <span>2.3 MB</span>
+                                    <span>65% complete</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_COMPONENT: UploadProgress -->
+                    </div>
+                    <!-- @END_COMPONENT: DocumentUpload -->
+
+                    <!-- @COMPONENT: QueryInterface -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900">Query Your Documents</h3>
+                            <div class="flex items-center space-x-2">
+                                <span class="text-xs bg-secondary text-white px-2 py-1 rounded-full">AI Powered</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <!-- @FUNCTIONALITY: Semantic search with natural language processing -->
+                            <div class="relative">
+                                <textarea 
+                                    class="w-full p-4 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                                    rows="4"
+                                    placeholder="Ask anything about your documents... e.g., 'What are the key findings in the research papers?'"
+                                    data-implementation="Should support semantic search and context understanding"
+                                ></textarea>
+                                <div class="absolute bottom-3 right-3 flex items-center space-x-2">
+                                    <span class="text-xs text-gray-400" data-mock="true">0/500</span>
+                                    <button class="bg-primary text-white p-2 rounded-lg hover:bg-blue-700 transition-colors" data-event="click:handleQuery">
+                                        <i class="fas fa-paper-plane"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- @COMPONENT: QuickQueries -->
+                            <div>
+                                <p class="text-sm font-medium text-gray-700 mb-3">Quick Queries:</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <button class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors" data-mock="true">
+                                        Summarize key points
+                                    </button>
+                                    <button class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors" data-mock="true">
+                                        Find methodology
+                                    </button>
+                                    <button class="px-3 py-1 text-sm bg-gray-100 text-gray-700 rounded-full hover:bg-gray-200 transition-colors" data-mock="true">
+                                        Extract conclusions
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- @END_COMPONENT: QuickQueries -->
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: QueryInterface -->
+                </div>
+
+                <!-- @COMPONENT: RecentQueries -->
+                <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Recent Queries & Responses</h3>
+                        <button class="text-primary hover:text-blue-700 text-sm font-medium">View All</button>
+                    </div>
+
+                    <div class="space-y-6">
+                        <!-- @MAP: recentQueries.map(query => ( -->
+                        <div class="border-l-4 border-primary pl-6 pb-6" data-mock="true">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-900 mb-1">What are the main conclusions from the climate research papers?</p>
+                                    <p class="text-sm text-gray-500">Asked 2 hours ago • 3 documents referenced</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs bg-secondary text-white px-2 py-1 rounded-full">Completed</span>
+                                    <button class="text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 rounded-lg p-4">
+                                <p class="text-gray-800 leading-relaxed">Based on the analysis of your uploaded research papers, the main conclusions indicate that climate change is accelerating at a faster rate than previously predicted. Key findings include a 15% increase in global temperature anomalies and significant impacts on Arctic ice coverage...</p>
+                                <div class="mt-3 flex items-center justify-between">
+                                    <div class="flex items-center space-x-4 text-sm text-gray-500">
+                                        <span><i class="fas fa-clock mr-1"></i>Response time: 1.8s</span>
+                                        <span><i class="fas fa-chart-bar mr-1"></i>Confidence: 94%</span>
+                                    </div>
+                                    <div class="flex items-center space-x-2">
+                                        <button class="text-gray-400 hover:text-secondary">
+                                            <i class="fas fa-thumbs-up"></i>
+                                        </button>
+                                        <button class="text-gray-400 hover:text-red-500">
+                                            <i class="fas fa-thumbs-down"></i>
+                                        </button>
+                                        <button class="text-gray-400 hover:text-gray-600">
+                                            <i class="fas fa-share"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="border-l-4 border-accent pl-6 pb-6" data-mock="true">
+                            <div class="flex items-start justify-between mb-3">
+                                <div class="flex-1">
+                                    <p class="font-medium text-gray-900 mb-1">Extract the methodology from the machine learning papers</p>
+                                    <p class="text-sm text-gray-500">Asked 5 hours ago • 2 documents referenced</p>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <span class="text-xs bg-accent text-white px-2 py-1 rounded-full">Processing</span>
+                                    <button class="text-gray-400 hover:text-gray-600">
+                                        <i class="fas fa-bookmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                                <div class="flex items-center space-x-3">
+                                    <div class="animate-spin w-5 h-5 border-2 border-accent border-t-transparent rounded-full"></div>
+                                    <p class="text-amber-800">Processing your request... Analyzing document embeddings and generating response.</p>
+                                </div>
+                                <div class="mt-3 w-full bg-amber-200 rounded-full h-2">
+                                    <div class="bg-accent h-2 rounded-full transition-all duration-300" style="width: 78%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- @END_MAP )) -->
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: RecentQueries -->
+
+                <!-- @COMPONENT: DocumentLibrary -->
+                <div class="mt-8 bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-semibold text-gray-900">Document Library</h3>
+                        <div class="flex items-center space-x-3">
+                            <div class="relative">
+                                <input type="text" placeholder="Search documents..." 
+                                       class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent">
+                                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                            </div>
+                            <button class="text-gray-400 hover:text-gray-600">
+                                <i class="fas fa-filter"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-4 font-medium text-gray-600">Document</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-600">Type</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-600">Size</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-600">Processed</th>
+                                    <th class="text-left py-3 px-4 font-medium text-gray-600">Status</th>
+                                    <th class="text-right py-3 px-4 font-medium text-gray-600">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <!-- @MAP: documents.map(doc => ( -->
+                                <tr class="hover:bg-gray-50" data-mock="true">
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-file-pdf text-red-600"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">Climate_Research_2024.pdf</p>
+                                                <p class="text-sm text-gray-500">Added 2 hours ago</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-gray-600">PDF</td>
+                                    <td class="py-4 px-4 text-gray-600">2.3 MB</td>
+                                    <td class="py-4 px-4 text-gray-600">Yes</td>
+                                    <td class="py-4 px-4">
+                                        <span class="px-2 py-1 text-xs font-medium bg-secondary text-white rounded-full">Active</span>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <div class="flex items-center justify-end space-x-2">
+                                            <button class="text-gray-400 hover:text-primary" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-400 hover:text-primary" title="Download">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="text-gray-400 hover:text-red-500" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr class="hover:bg-gray-50" data-mock="true">
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-file-alt text-blue-600"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">ML_Algorithms_Guide.txt</p>
+                                                <p class="text-sm text-gray-500">Added 1 day ago</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-gray-600">TXT</td>
+                                    <td class="py-4 px-4 text-gray-600">856 KB</td>
+                                    <td class="py-4 px-4 text-gray-600">Yes</td>
+                                    <td class="py-4 px-4">
+                                        <span class="px-2 py-1 text-xs font-medium bg-secondary text-white rounded-full">Active</span>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <div class="flex items-center justify-end space-x-2">
+                                            <button class="text-gray-400 hover:text-primary" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-400 hover:text-primary" title="Download">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="text-gray-400 hover:text-red-500" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr class="hover:bg-gray-50" data-mock="true">
+                                    <td class="py-4 px-4">
+                                        <div class="flex items-center space-x-3">
+                                            <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-file-pdf text-red-600"></i>
+                                            </div>
+                                            <div>
+                                                <p class="font-medium text-gray-900">Financial_Report_Q4.pdf</p>
+                                                <p class="text-sm text-gray-500">Added 3 days ago</p>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="py-4 px-4 text-gray-600">PDF</td>
+                                    <td class="py-4 px-4 text-gray-600">1.8 MB</td>
+                                    <td class="py-4 px-4 text-gray-600">Processing</td>
+                                    <td class="py-4 px-4">
+                                        <span class="px-2 py-1 text-xs font-medium bg-accent text-white rounded-full">Processing</span>
+                                    </td>
+                                    <td class="py-4 px-4 text-right">
+                                        <div class="flex items-center justify-end space-x-2">
+                                            <button class="text-gray-400 hover:text-primary" title="View">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-400 hover:text-primary" title="Download">
+                                                <i class="fas fa-download"></i>
+                                            </button>
+                                            <button class="text-gray-400 hover:text-red-500" title="Delete">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <!-- @END_MAP )) -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: DocumentLibrary -->
+            </main>
+            <!-- @END_COMPONENT: MainDashboard -->
+        </div>
+        <!-- @END_COMPONENT: MainContent -->
+    </div>
+    <!-- @END_COMPONENT: AppLayout -->
+
+    <!-- @COMPONENT: ErrorToast -->
+    <div id="errorToast" class="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg hidden" data-implementation="Show for error states">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>Error processing document. Please try again.</span>
+            <button onclick="hideToast()" class="ml-2 text-white hover:text-red-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: ErrorToast -->
+
+    <!-- @COMPONENT: SuccessToast -->
+    <div id="successToast" class="fixed top-4 right-4 bg-secondary text-white px-6 py-3 rounded-lg shadow-lg hidden" data-implementation="Show for success states">
+        <div class="flex items-center space-x-3">
+            <i class="fas fa-check-circle"></i>
+            <span>Document processed successfully!</span>
+            <button onclick="hideToast()" class="ml-2 text-white hover:text-green-200">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: SuccessToast -->
+
+    <script>
+        // TODO: Implement business logic, API calls, and state management
+        
+        // Basic UI interactions (no business logic)
+        (function() {
+            function hideToast() {
+                document.getElementById('errorToast').classList.add('hidden');
+                document.getElementById('successToast').classList.add('hidden');
+            }
+            
+            // Make hideToast available globally for the toast buttons
+            window.hideToast = hideToast;
+            
+            // Demo interaction handlers (UI only)
+            document.addEventListener('DOMContentLoaded', function() {
+                // File upload area interactions
+                const uploadArea = document.querySelector('[data-event="click:handleFileUpload"]').closest('.border-dashed');
+                if (uploadArea) {
+                    uploadArea.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        this.classList.add('border-primary', 'bg-blue-50');
+                    });
+                    
+                    uploadArea.addEventListener('dragleave', function(e) {
+                        e.preventDefault();
+                        this.classList.remove('border-primary', 'bg-blue-50');
+                    });
+                    
+                    uploadArea.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        this.classList.remove('border-primary', 'bg-blue-50');
+                        // TODO: Handle file upload logic
+                    });
+                }
+                
+                // Auto-hide toasts after 5 seconds
+                function showToast(type) {
+                    const toast = document.getElementById(type + 'Toast');
+                    if (toast) {
+                        toast.classList.remove('hidden');
+                        setTimeout(() => {
+                            toast.classList.add('hidden');
+                        }, 5000);
+                    }
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
